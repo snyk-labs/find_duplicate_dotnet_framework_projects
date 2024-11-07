@@ -26,6 +26,7 @@ def create_request_method(method):
     
     return http_method
 
+
 # Paginate through Snyk's API endpoints with retry and backoff
 def pagination_snyk_rest_endpoint(method, url, *args):
     retries = 3
@@ -87,63 +88,32 @@ def get_snyk_targets(org_id):
 
 # Return all Snyk orgs in group
 def get_snyk_orgs(groupId):
-    # print("Collecting organization IDs")
     url = f'https://api.snyk.io/rest/groups/{groupId}/orgs?version={rest_version}&limit=100'
 
     org_data = pagination_snyk_rest_endpoint('GET', url)
     
     return org_data
 
+
 # Get cpp projects from all Snyk Orgs.
 def get_cpp_snyk_projects_for_target(org_id, target_id):
-    # print("Collecting cpp project data")
     url = f'https://api.snyk.io/rest/orgs/{org_id}/projects/?version={rest_version}&limit=100&types=nuget%2Ccpp&target_id={target_id}'
     
     cpp_project_data = pagination_snyk_rest_endpoint('GET', url)
     
     return cpp_project_data
 
-# Get all projects from list of Snyk orgs.
-# def get_snyk_projects(orgs_data):
-#     print("Collecting projects data")
-#     projects = []
-#     for org_data in orgs_data:
-#         org_id = org_data['id']
-#         url = f'https://api.snyk.io/rest/orgs/{org_id}/projects/?version={rest_version}&limit=100'
 
-#         has_next_link = True
+# Delete a Snyk project
+def delete_snyk_project(org_id, project_id):
+    url = f'https://api.snyk.io/rest/orgs/{org_id}/projects/{project_id}?version={rest_version}'
+    
+    delete_project_response = pagination_snyk_rest_endpoint('DELETE', url)
+    
+    return delete_project_response
 
-#         while has_next_link:
-#             try:
-#                 projects_api_response = requests.get(url, headers=rest_headers)
-#                 projectsData = projects_api_response.json()['data']
-#                 projects.extend(projectsData)
-#             except:
-#                 print("Targets endpoint call failed.")
-#                 print(projects_api_response)
-            
-#             # Check if next page exist and set url if it does.  If not, exit and return issuesData
-#             try:
-#                 projects_api_response.json()['links']['next']
-#                 url = 'https://api.snyk.io' + projects_api_response.json()['links']['next']
-#             except:
-#                 has_next_link = False
 
-#     return projects
-
-# def get_snyk_project(org_id, project_id):
-#     print("Collecting project data")
-#     url = f'https://api.snyk.io/rest/orgs/{org_id}/projects/{project_id}?version={rest_version}'
-
-#     try:
-#         projects_api_response = requests.get(url, headers=rest_headers)
-#         projectsData = projects_api_response.json()['data']
-#         return projectsData
-#     except:
-#         print("Targets endpoint call failed.")
-#         print(projects_api_response)
-#         return projects_api_response
-
+# Deactivates a Snyk project
 def deactivate_snyk_project(org_id, project_id):
     print(f"Disabling Snyk project.  Project ID: {project_id}")
     url = f'https://api.snyk.io/v1/org/{org_id}/project/{project_id}/deactivate'

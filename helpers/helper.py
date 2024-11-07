@@ -168,4 +168,34 @@ def find_duplicate_cpp_projects(projects_data):
         else:
             print(f"Target Runtime doesn't exist for {project['attributes']['name']}, skipping comparision")
 
-    return conflicts                  
+    return conflicts
+
+
+# Check if the file exists at the provided path
+def check_csv_file_exists(file_path):
+    if os.path.exists(file_path):
+        if file_path.lower().endswith('.csv'):
+            return True
+        else:
+            print("The file exists but is not a CSV file.")
+            return False
+    else:
+        print(f"The file at '{file_path}' does not exist.")
+        return False
+
+# Reads in csv file data and returns in json format
+def csv_to_json(csv_file_path):
+    if check_csv_file_exists(csv_file_path):   
+        try:
+            with open(csv_file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+                print("Collecting data from csv file")
+                reader = csv.DictReader(csvfile)
+                
+                rows = [row for row in reader]
+
+            return rows
+        
+        except FileNotFoundError:
+            return f"Error: The file '{csv_file_path}' was not found."
+        except Exception as e:
+            return f"Error: {e}"               

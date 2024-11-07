@@ -1,20 +1,28 @@
-import json
-import sys
 import typer
 from typing_extensions import Annotated
-from helpers.helper import check_dry_run_variable, create_csv_file, find_duplicate_cpp_projects, get_project_name, get_target_file_name, return_targetframework_data, get_created_date
-from apis.snykApi import get_snyk_orgs, get_cpp_snyk_projects_for_target, get_snyk_targets
+from helpers.helper import csv_to_json, create_csv_file, find_duplicate_cpp_projects, get_project_name, get_target_file_name, return_targetframework_data, get_created_date
+from apis.snykApi import get_snyk_orgs, get_cpp_snyk_projects_for_target, get_snyk_targets, deactivate_snyk_project, delete_snyk_project
 
 app = typer.Typer()
 
 @app.command()
-def deactivate_duplicate_cpp_projects(group_id: Annotated[str, typer.Argument(help="Original group ID in Snyk")], dry_run: Annotated[bool, typer.Argument(help="Specify false to set tags.  Default value is True.")] = 'True'):
-    # Check if dry run is disabled
-    dry_run_check = check_dry_run_variable(dry_run)
-    if dry_run_check == None:
-        print('Incorrect dry_run variable.  Must be true or false')
-        sys.exit(1)
+def delete_duplicate_cpp_projects(csv_file_path: Annotated[str, typer.Argument(help="Path to dotnet-projects-to-be-disabled-or-deleted.csv that was generated from the find-duplicate-cpp-projects command.")]):
+    csv_data = csv_to_json(csv_file_path)
+    print("Deleting Snyk projects")
+    for data in csv_data:
+        delete_snyk_project(data['Organization ID'], data['Old Project ID'])
+        
 
+@app.command()
+def deactivate_duplicate_cpp_projects(csv_file_path: Annotated[str, typer.Argument(help="Path to dotnet-projects-to-be-disabled-or-deleted.csv that was generated from the find-duplicate-cpp-projects command.")]):
+    csv_data = csv_to_json(csv_file_path)
+    print("Deactivting Snyk projects")
+    for data in csv_data:
+        deactivate_snyk_project(data['Organization ID'], data['Old Project ID'])
+    
+    
+@app.command()
+def find_duplicate_cpp_projects(group_id: Annotated[str, typer.Argument(help="Original group ID in Snyk")]):
     # Gather orgs from provided group id
     print("Collecting organization IDs")
     orgs_data = get_snyk_orgs(group_id)
@@ -29,11 +37,9 @@ def deactivate_duplicate_cpp_projects(group_id: Annotated[str, typer.Argument(he
                 # return any cpp projects in target
                 projects_data = get_cpp_snyk_projects_for_target(org_data['id'], target_data['id'])
                 if any(projects_data):
-                    # print(json.dumps(projects_data, indent=2))
                     # Find duplicate .Net projects
                     duplicate_projects_data = find_duplicate_cpp_projects(projects_data)
                     for project_1, project_2 in duplicate_projects_data:
-                        # print(f"Conflict found between:\nProject 1: {project_1}\nProject 2: {project_2}\n")
                         new_project, old_project, new_targetframework, old_targetframework = return_targetframework_data(project_1, project_2)
                         # Retrieving names for csv and accounting for differences in json format.
                         new_project_name = get_project_name(new_project)
