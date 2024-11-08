@@ -1,6 +1,6 @@
 import typer
 from typing_extensions import Annotated
-from helpers.helper import csv_to_json, create_csv_file, find_duplicate_cpp_projects, get_project_name, get_target_file_name, return_targetframework_data, get_created_date
+from helpers.helper import csv_to_json, create_csv_file, return_duplicate_cpp_projects, format_csv_data
 from apis.snykApi import get_snyk_orgs, get_cpp_snyk_projects_for_target, get_snyk_targets, deactivate_snyk_project, delete_snyk_project
 
 app = typer.Typer()
@@ -38,16 +38,18 @@ def find_duplicate_cpp_projects(group_id: Annotated[str, typer.Argument(help="Or
                 projects_data = get_cpp_snyk_projects_for_target(org_data['id'], target_data['id'])
                 if any(projects_data):
                     # Find duplicate .Net projects
-                    duplicate_projects_data = find_duplicate_cpp_projects(projects_data)
+                    duplicate_projects_data = return_duplicate_cpp_projects(projects_data)
                     for project_1, project_2 in duplicate_projects_data:
-                        new_project, old_project, new_targetframework, old_targetframework = return_targetframework_data(project_1, project_2)
+                        # new_project, old_project, new_targetframework, old_targetframework = return_targetframework_data(project_1, project_2)
                         # Retrieving names for csv and accounting for differences in json format.
-                        new_project_name = get_project_name(new_project)
-                        old_project_name = get_project_name(old_project)
-                        new_project_target_file = get_target_file_name(new_project)
-                        old_project_target_file = get_target_file_name(old_project)
-                        new_project_created_data = get_created_date(new_project)
-                        old_project_created_data = get_created_date(old_project)
+                        # new_project_name = get_project_name(new_project)
+                        # old_project_name = get_project_name(old_project)
+                        # new_project_target_file = get_target_file_name(new_project)
+                        # old_project_target_file = get_target_file_name(old_project)
+                        # new_project_created_data = get_created_date(new_project)
+                        # old_project_created_data = get_created_date(old_project)
+                        
+                        new_targetframework, old_targetframework, new_project, old_project, new_project_name, old_project_name, new_project_target_file, old_project_target_file, new_project_created_data, old_project_created_data = format_csv_data(project_1, project_2)
                     
                         if new_project == None:
                             print("Missing targetframework in one of the projects.  Skipping...")

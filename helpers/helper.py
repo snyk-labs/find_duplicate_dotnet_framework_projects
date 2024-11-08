@@ -147,7 +147,7 @@ def get_targetframework(project_data):
     else:
         return None        
         
-def find_duplicate_cpp_projects(projects_data):
+def return_duplicate_cpp_projects(projects_data):
     print('Comparing project data...')
     seen = {}
     conflicts = []
@@ -161,7 +161,7 @@ def find_duplicate_cpp_projects(projects_data):
             
             if key in seen:
                 # Check for different target_runtime
-                if seen[key]["target_runtime"] != runtime:
+                if seen[key]["target_runtime"] != runtime and seen[key]:
                     conflicts.append((seen[key], project))
             else:
                 seen[key] = {**attrs, "id": project["id"]}  # Include the ID in the same dictionary
@@ -198,4 +198,16 @@ def csv_to_json(csv_file_path):
         except FileNotFoundError:
             return f"Error: The file '{csv_file_path}' was not found."
         except Exception as e:
-            return f"Error: {e}"               
+            return f"Error: {e}"     
+        
+        
+def format_csv_data(project_1, project_2):
+    new_project, old_project, new_targetframework, old_targetframework = return_targetframework_data(project_1, project_2)
+    new_project_name = get_project_name(new_project)
+    old_project_name = get_project_name(old_project)
+    new_project_target_file = get_target_file_name(new_project)
+    old_project_target_file = get_target_file_name(old_project)
+    new_project_created_data = get_created_date(new_project)
+    old_project_created_data = get_created_date(old_project)
+    
+    return new_targetframework, old_targetframework, new_project, old_project, new_project_name, old_project_name, new_project_target_file, old_project_target_file, new_project_created_data, old_project_created_data
