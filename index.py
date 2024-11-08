@@ -39,16 +39,8 @@ def find_duplicate_cpp_projects(group_id: Annotated[str, typer.Argument(help="Or
                 if any(projects_data):
                     # Find duplicate .Net projects
                     duplicate_projects_data = return_duplicate_cpp_projects(projects_data)
-                    for project_1, project_2 in duplicate_projects_data:
-                        # new_project, old_project, new_targetframework, old_targetframework = return_targetframework_data(project_1, project_2)
-                        # Retrieving names for csv and accounting for differences in json format.
-                        # new_project_name = get_project_name(new_project)
-                        # old_project_name = get_project_name(old_project)
-                        # new_project_target_file = get_target_file_name(new_project)
-                        # old_project_target_file = get_target_file_name(old_project)
-                        # new_project_created_data = get_created_date(new_project)
-                        # old_project_created_data = get_created_date(old_project)
-                        
+                    for project_1, project_2 in duplicate_projects_data:      
+                        # Retrieving names for csv and accounting for differences in json format.                  
                         new_targetframework, old_targetframework, new_project, old_project, new_project_name, old_project_name, new_project_target_file, old_project_target_file, new_project_created_data, old_project_created_data = format_csv_data(project_1, project_2)
                     
                         if new_project == None:
